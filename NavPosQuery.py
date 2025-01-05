@@ -73,18 +73,18 @@ client = influxdb_client.InfluxDBClient(url=url, token=token, org=org, timeout=6
 
 query_api = client.query_api()
 
-startDate = datetime.datetime(2024, 10, 3, 0, 0, 0, 0, tzinfo = datetime.timezone.utc)
-stopDate = datetime.datetime(2024, 10, 3, 23, 59, 59, 9999, tzinfo = datetime.timezone.utc)
+startDate = datetime.datetime(2024, 12, 21, 0, 0, 0, 0, tzinfo = datetime.timezone.utc)
+stopDate = datetime.datetime(2024, 12, 23, 23, 59, 59, 9999, tzinfo = datetime.timezone.utc)
 
 strStartDate = startDate.strftime('%Y-%m-%dT%H:%M:%SZ')
 strStopDate = stopDate.strftime('%Y-%m-%dT%H:%M:%SZ')
 
 #|> range(start: today()) 
 #|> drop(columns: ["s2_cell_id"])
-
+# and r.source == "1.115"
 query = f"""from(bucket: "HeiheiRere") 
             |> range(start: {strStartDate}, stop: {strStopDate})
-            |> filter(fn: (r) => r._measurement == "navigation.position" and r.source == "1.115")
+            |> filter(fn: (r) => r._measurement == "navigation.position" and r.source == "1.0")
             """
 
 print(f'Query: \n {query}')
@@ -92,11 +92,11 @@ print(f'Query: \n {query}')
 tables = query_api.query(query=query, org=org)
 
 print("N Tables: ", len(tables))
-# for table in tables:
-#    print("N Records: ", len(table.records))
-#    print(table.records[0])
-#   #for record in table.records:
-#   #   print(record)
+for table in tables:
+   print("N Records: ", len(table.records))
+   print(table.records[0])
+  #for record in table.records:
+  #   print(record)
 
 #Create GPX File
 gpx = gpxpy.gpx.GPX()

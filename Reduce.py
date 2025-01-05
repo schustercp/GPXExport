@@ -10,7 +10,7 @@ import gpxpy.gpx
 def myFunc(e):
   return e.time
 
-filename = "2024-10-03"
+filename = "2024-12-23"
 
 gpx_file = open('/Users/schustercp/workspace/GPXExport/' + filename + '.gpx', 'r')
 
