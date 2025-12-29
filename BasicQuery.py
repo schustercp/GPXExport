@@ -13,7 +13,10 @@ import gpxpy.gpx
 url = "http://192.168.0.50:8086"
 #HeiheiRere.1v8 -- token = "10uZUSzNsU9c31fuQKIZV8gjmZfKOuLvAm25mIulp3UuRlOPi0OBlRQ3sawTMdIu01uAV-ITcsFC5lfkOyUECQ=="
 #HeiheiRere Readonly Token
-token = "umFBOGjBXOA5a7OXifHOmsDOduL8m4qRIzltjaqUgib2jysszASWIPea79P2ywt_th39g1zBSLJEpCNuXVVsCg=="
+# token = "umFBOGjBXOA5a7OXifHOmsDOduL8m4qRIzltjaqUgib2jysszASWIPea79P2ywt_th39g1zBSLJEpCNuXVVsCg=="
+# org = "HeiheiRere"
+
+token = "FxdLWnZjqCDK4W1I0LA6LDYk0kCyoQL3YspavANthG5QdJch-Sgm4hJNnosx3NSbbahGFM6zjzV0vZytH4Egvg=="
 org = "HeiheiRere"
 
 client = influxdb_client.InfluxDBClient(url=url, token=token, org=org, timeout=60000)
@@ -36,21 +39,35 @@ query_api = client.query_api()
 #    print(record)
 
 #***********************************************************************
-query = """
-import "timezone"
-import "strings"
-option location = timezone.location(name:"America/New_York")
-from(bucket: "HeiheiRere") 
-            |> range(start: today()) 
-            |> filter(fn: (r) => r._measurement == "environment.moon.times.rise")
-            |> last()
-            |> map(fn: (r) => ({r with _value: strings.trim(v: r._value, cutset: "\\\"")}))
-            |> toTime()
-            |> drop(columns: ["_time", "tag"])"""
+# query = """
+# import "timezone"
+# import "strings"
+# option location = timezone.location(name:"America/New_York")
+# from(bucket: "HeiheiRere") 
+#             |> range(start: today()) 
+#             |> filter(fn: (r) => r._measurement == "environment.moon.times.rise")
+#             |> last()
+#             |> map(fn: (r) => ({r with _value: strings.trim(v: r._value, cutset: "\\\"")}))
+#             |> toTime()
+#             |> drop(columns: ["_time", "tag"])"""
 
 # query = """from(bucket: "HeiheiRere") 
 #             |> range(start: -1d) 
 #             |> filter(fn: (r) => r.source == "signalk-barometer-trend")"""
+
+#|> range(start: {strStartDate}, stop: {strStopDate})
+
+startDate = datetime.datetime(2024, 12, 1, 0, 0, 0, 0, tzinfo = datetime.timezone.utc)
+stopDate = datetime.datetime(2025, 3, 1, 23, 59, 59, 9999, tzinfo = datetime.timezone.utc)
+
+strStartDate = startDate.strftime('%Y-%m-%dT%H:%M:%SZ')
+strStopDate = stopDate.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+query = f"""
+import "influxdata/influxdb/schema"
+from(bucket: "HeiheiRere")
+    |> range(start: {strStartDate}, stop: {strStopDate})
+    |> filter(fn: (r) => r._measurement == "environment.outside.temperature")"""
 
 print(f'Query: \n {query}')
 
@@ -59,7 +76,12 @@ tables = query_api.query(query=query, org=org)
 print("N Tables: ", len(tables))
 for table in tables:
   print("N Records: ", len(table.records))
+  print()
+  print(table.records[0])
+  print()
   print(table.records[-1])
+  print()
+  print()
   # for record in table.records:
   #   print(record)
 

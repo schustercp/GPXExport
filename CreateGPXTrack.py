@@ -112,7 +112,8 @@ def ReduceGPXFile(original_gpx, filename):
 url = "http://192.168.0.50:8086"
 #HeiheiRere.1v8 -- token = "10uZUSzNsU9c31fuQKIZV8gjmZfKOuLvAm25mIulp3UuRlOPi0OBlRQ3sawTMdIu01uAV-ITcsFC5lfkOyUECQ=="
 #HeiheiRere Readonly Token
-token = "umFBOGjBXOA5a7OXifHOmsDOduL8m4qRIzltjaqUgib2jysszASWIPea79P2ywt_th39g1zBSLJEpCNuXVVsCg=="
+token = "10uZUSzNsU9c31fuQKIZV8gjmZfKOuLvAm25mIulp3UuRlOPi0OBlRQ3sawTMdIu01uAV-ITcsFC5lfkOyUECQ=="
+#token = "umFBOGjBXOA5a7OXifHOmsDOduL8m4qRIzltjaqUgib2jysszASWIPea79P2ywt_th39g1zBSLJEpCNuXVVsCg=="
 org = "HeiheiRere"
 
 client = influxdb_client.InfluxDBClient(url=url, token=token, org=org, timeout=60000)
@@ -120,8 +121,8 @@ client = influxdb_client.InfluxDBClient(url=url, token=token, org=org, timeout=6
 query_api = client.query_api()
 
 MonthOfInterest = 1
-MonthsToFollow = 4
-YearOfInterest = 2025
+MonthsToFollow = 11
+YearOfInterest = 2023
 
 for m in range(MonthOfInterest, MonthOfInterest + MonthsToFollow):
   days_in_month = calendar.monthrange(YearOfInterest, m)[1] + 1
@@ -138,7 +139,7 @@ for m in range(MonthOfInterest, MonthOfInterest + MonthsToFollow):
       #|> range(start: today()) 
       #|> drop(columns: ["s2_cell_id"])
       # and r.source == "1.115"
-      query = f"""from(bucket: "HeiheiRere") 
+      query = f"""from(bucket: "HeiheiRere.1v8") 
                   |> range(start: {strStartDate}, stop: {strStopDate})
                   |> filter(fn: (r) => r._measurement == "navigation.position" and r.source == "{GPSSource}")
                   """

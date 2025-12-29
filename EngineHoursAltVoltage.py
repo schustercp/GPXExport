@@ -48,7 +48,7 @@ strStopDate = stopDate.strftime('%Y-%m-%dT%H:%M:%SZ')
 # starboard or port
 query = f"""from(bucket: "HeiheiRere") 
             |> range(start: {strStartDate}, stop: {strStopDate})
-            |> filter(fn: (r) => r._measurement == "propulsion.port.oilPressure")
+            |> filter(fn: (r) => r._measurement == "propulsion.starboard.alternatorVoltage")
             """
 
 print(f'Query: \n {query}')
@@ -77,8 +77,7 @@ for table in tables:
   engineRun = False
   for x in range(0, len(table.records)):
     time1 = table.records[x].get_time()
-    EngineOilPress = table.records[x].get_value()
-    EngineOilPressPSI = EngineOilPress / 6894.76
+    AlternatorVoltage = table.records[x].get_value()
     if x > 0:
       timeDiff1 = time1 - prevTime
       if timeDiff1.total_seconds() < 0:
@@ -88,23 +87,23 @@ for table in tables:
         engineRun = False
       else:
         if engineRun:
-          if EngineOilPressPSI < 1.0:
+          if AlternatorVoltage < 5.0:
             engineRun = False
             engineStop = time1
             runTime = engineStop - engineStart
             engineTime += runTime
             print("Engine Stop: ", engineStop, "Run Time: ", runTime)
-            print("    Engine Stop Pressure: ", EngineOilPressPSI)
+            print("    Engine Stop: ", AlternatorVoltage)
             event = EngineEvent(engineStart, engineStop, runTime)
             engineEvents.append(event)
         else:
-          if EngineOilPressPSI > 4.0:
+          if AlternatorVoltage > 5.0:
             if engineRun == False:
               engineRun = True
               engineStart = time1
-              print("Engine Start: ", engineStart, EngineOilPressPSI)
+              print("Engine Start: ", engineStart, AlternatorVoltage)
     prevTime = time1
-    prevPressure = EngineOilPressPSI
+    prevPressure = AlternatorVoltage
 
 
 print("")
